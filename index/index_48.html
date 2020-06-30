@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="three r107.js"></script>
+		<style>
+		body{
+			background: black;
+			padding: 0;
+			margin: 0;
+			overflow: hidden;
+		}
+		#canvas{
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        #cover{
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+		</style>
+	</head>
+	<body>
+    <canvas id="canvas"></canvas>
+    <div id="cover"></div>
+    
+	<script>
+    const TO_RADIANS = Math.PI / 180
+
+    class Cube{
+        constructor(length, color, degree){
+            this.length = length
+            this.color = color
+        }
+        createCube(scene, group, degree){
+            let boxGeometry = new THREE.BoxGeometry(this.length, this.length, this.length)
+            let geometry = new THREE.EdgesGeometry(boxGeometry)
+            let material = new THREE.LineBasicMaterial({
+                transparent: true,
+                opacity: 0.125,
+                color: this.color
+            })
+            let mesh = new THREE.LineSegments(geometry, material)
+            mesh.rotation.x = TO_RADIANS * degree
+            mesh.rotation.y = TO_RADIANS * degree
+            group.add(mesh)
+            scene.add(group)
+        }
+        disposeCube(child){
+            child.geometry.dispose()
+            child.material.dispose()
+        }
+    }
+    class Icosahedron{
+        constructor(size, seg, color, opacity){
+            
+        }
+    }
+
+    let width, height, renderer, scene, camera
+    let cubeGroup
+
+	width = window.innerWidth
+	height = window.innerHeight
+    
+    init();
+	function init(){
+        scene = new THREE.Scene()
+        
+		renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: canvas})
+		renderer.setSize(width, height)
+		renderer.setClearColor(0x000000)
+		renderer.setClearAlpha(0.0)
+
+		camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000)
+		scene.add(camera)
+        camera.position.z = 50
+
+        cubeGroup = new THREE.Group()
+
+        cube()
+
+		window.addEventListener('resize', onWindowResize, false)
+
+        animate()
+
+        console.log(cubeGroup)
+    }
+
+    function cube(){
+        let cubes = 200
+        let length = 10
+        let degree = 1
+        let instance = new Cube(length, 0xff2b2b)
+        for(let i = 0; i < cubes; i++){
+            instance.createCube(scene, cubeGroup, i * degree / 2)
+        }
+    }
+
+	function onWindowResize(){
+		width = window.innerWidth
+		height = window.innerHeight
+
+		camera.aspect = width / height
+		camera.updateProjectionMatrix()
+
+		renderer.setSize(width, height)
+    }
+
+	function render(){
+        cubeGroup.children.forEach(e => {
+            e.rotation.x += 0.04;
+            e.rotation.y += 0.04;
+        })
+        cubeGroup.rotation.x += 0.01;
+        cubeGroup.rotation.y += 0.01;
+		camera.lookAt(scene.position)
+		renderer.render(scene, camera)
+    }
+
+	function animate(){
+		render()
+		requestAnimationFrame(animate)
+	}
+	</script>
+	</body>
+</html>
